@@ -52,7 +52,7 @@ server.on("connection", (socket) => {
     data = JSON.parse(data.toString());
     if (data.action == "addMe") {
       socket.id = `${socket.remoteAddress}:${socket.remotePort}`;
-      socket.write(JSON.stringify({ action: "welcome", data: nodeList }));
+      socket.write(JSON.stringify({ action: "welcome", data: {nodeList,chain : blockChain.chain} }));
       nodeList.push(`${socket.remoteAddress}:${socket.remotePort - 2}`);
       socketCtrl.addNode(`${socket.remoteAddress}:${socket.remotePort - 2}`);
       socketCtrl.sockets.push(socket);

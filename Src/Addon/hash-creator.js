@@ -22,15 +22,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 exports.hashCreator = void 0;
-const crypto = __importStar(require("crypto"));
-const hashCreator = (...data) => {
-    const hash = crypto.createHash("sha256");
+var crypto = __importStar(require("crypto"));
+var hashCreator = function () {
+    var data = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        data[_i] = arguments[_i];
+    }
+    var hash = crypto.createHash("sha256");
     return hash
         .update(data
         .sort()
-        .map((x) => {
+        .map(function (x) {
         return JSON.stringify(x);
     })
         .join(" "))
