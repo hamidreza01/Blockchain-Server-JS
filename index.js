@@ -1,13 +1,23 @@
 const express = require("express");
+
 const app = express();
+
 const { Blockchain } = require("./Src/classes/Blockchain/Blockchain");
+const {TransactionPool} = require("./Src/classes/Blockchain/TransactionPool");
+const { Transaction } = require("./Src/classes/Blockchain/Transaction");
+const transactionPool = new TransactionPool();
 const {
   config: { ADMIN },
 } = require("./config");
+
 let nodeList = [ADMIN.httpIP];
+
 const axios = require("axios").default;
+
 const net = require("net");
+
 const server = net.createServer();
+
 const blockChain = new Blockchain();
 
 class SocketCtrl {
@@ -52,7 +62,12 @@ server.on("connection", (socket) => {
     data = JSON.parse(data.toString());
     if (data.action == "addMe") {
       socket.id = `${socket.remoteAddress}:${socket.remotePort}`;
-      socket.write(JSON.stringify({ action: "welcome", data: {nodeList,chain : blockChain.chain} }));
+      socket.write(
+        JSON.stringify({
+          action: "welcome",
+          data: { nodeList, chain: blockChain.chain , transactionMap : transactionPool.transactionMap},
+        })
+      );
       nodeList.push(`${socket.remoteAddress}:${socket.remotePort - 2}`);
       socketCtrl.addNode(`${socket.remoteAddress}:${socket.remotePort - 2}`);
       socketCtrl.sockets.push(socket);
@@ -97,12 +112,23 @@ app.use((req, res, next) => {
   }
 });
 
-app.post("/replaceChain", (req, res, next) => {
+app.post("/chain", (req, res, next) => {
   try {
-    blockChain.replaceChain(req.body.chain);
-    res.status(200).json({
-      process: true,
-    });
+    blockChain.replaceChain(req.body);
+    res.send('ok')
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post("/transaction", (req, res, next) => {
+  try {
+    const check = Transaction.isValid(req.body);
+    if (check !== true) {
+      return check;
+    }
+    transactionPool.add(req.body);
+    res.send('ok')
   } catch (err) {
     next(err);
   }

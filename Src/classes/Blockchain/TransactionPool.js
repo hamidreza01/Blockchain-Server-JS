@@ -6,11 +6,17 @@ var TransactionPool = /** @class */ (function () {
         this.transactionMap = {};
     }
     TransactionPool.prototype.add = function (transaction) {
+        // const check = Transaction.isValid(transaction)
+        // if(check !== true){
+        //     return check as _Errors;
+        // } 
         this.transactionMap[transaction.id] = transaction;
     };
     TransactionPool.prototype.isHave = function (wallet) {
-        var val = this.transactionMap.values();
-        return val.find(function (x) { return x.inputMap.address === wallet.publicKey; });
+        var val = Object.values(this.transactionMap);
+        return val.find(function (x) {
+            return x.inputMap.address === wallet.publicKey;
+        });
     };
     return TransactionPool;
 }());
