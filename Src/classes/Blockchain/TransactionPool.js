@@ -1,24 +1,31 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionPool = void 0;
-var TransactionPool = /** @class */ (function () {
-    function TransactionPool() {
-        this.transactionMap = {};
+class TransactionPool {
+    transactionMap = {};
+    constructor() {
     }
-    TransactionPool.prototype.add = function (transaction) {
-        // const check = Transaction.isValid(transaction)
-        // if(check !== true){
-        //     return check as _Errors;
-        // } 
+    add(transaction) {
         this.transactionMap[transaction.id] = transaction;
-    };
-    TransactionPool.prototype.isHave = function (wallet) {
-        var val = Object.values(this.transactionMap);
-        return val.find(function (x) {
+    }
+    isHave(wallet) {
+        let val = Object.values(this.transactionMap);
+        return val.find(x => {
             return x.inputMap.address === wallet.publicKey;
         });
-    };
-    return TransactionPool;
-}());
+    }
+    clear() {
+        this.transactionMap = {};
+    }
+    clearBlockchainTransactions(chain) {
+        for (let i = 1; i < chain.length; i++) {
+            const block = chain[i];
+            for (let j = 1; j < block.data.transaction.length; j++) {
+                const tx = block.data.transaction[j];
+                delete this.transactionMap[tx.id];
+            }
+        }
+    }
+}
 exports.TransactionPool = TransactionPool;
 ;

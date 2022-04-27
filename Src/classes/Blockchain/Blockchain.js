@@ -1,20 +1,21 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.Blockchain = void 0;
-var hash_creator_1 = require("../../Addon/hash-creator");
-var Block_1 = require("./Block");
-var Blockchain = /** @class */ (function () {
-    function Blockchain() {
-        this.chain = [Block_1.Block.genesis()];
-    }
-    Blockchain.prototype.addBlock = function (data) {
-        var block = Block_1.Block.mineBlock(this.chain[this.chain.length - 1], data);
+const hash_creator_1 = require("../../Addon/hash-creator");
+const Block_1 = require("./Block");
+const config_1 = require("../../../config");
+const Transaction_1 = require("./Transaction");
+const Wallet_1 = require("./Wallet");
+class Blockchain {
+    chain = [Block_1.Block.genesis()];
+    addBlock(data) {
+        const block = Block_1.Block.mineBlock(this.chain[this.chain.length - 1], data);
         this.chain.push(block);
-    };
-    Blockchain.isValid = function (chain) {
+    }
+    static isValid(chain) {
         if (JSON.stringify(chain[0]) !== JSON.stringify(Block_1.Block.genesis()))
             return false;
-        for (var i = 1; i < chain.length; i++) {
+        for (let i = 1; i < chain.length; i++) {
             if (chain[i].hash !==
                 (0, hash_creator_1.hashCreator)(chain[i].lastHash, JSON.stringify(chain[i].data), chain[i].nonce.toString(), chain[i].difficulty.toString(), chain[i].timestamp.toString())) {
                 return false;
@@ -27,8 +28,8 @@ var Blockchain = /** @class */ (function () {
             }
         }
         return true;
-    };
-    Blockchain.prototype.replaceChain = function (chain) {
+    }
+    replaceChain(chain) {
         if (chain.length < this.chain.length) {
             return { message: "chain is short", code: 101 };
         }
@@ -37,7 +38,40 @@ var Blockchain = /** @class */ (function () {
         }
         this.chain = chain;
         return true;
-    };
-    return Blockchain;
-}());
+    }
+    validTransactionData(chain) {
+        for (let i = 1; i < chain?.length; i++) {
+            if (chain[i]?.data?.transaction?.length < 1)
+                return { message: "chain data is empty", code: 120 };
+            for (let transaction of chain[i]?.data?.transaction) {
+                let rewardNumber = 0;
+                if (transaction?.inputMap?.address === config_1.config.REWARD_TRANSACTION.address) {
+                    rewardNumber++;
+                    if (rewardNumber > 1) {
+                        return {
+                            message: "reward transaction length is ivalid",
+                            code: 122,
+                        };
+                    }
+                    if (Object.values(transaction.outputMap).reduce((all, val) => (all + val)) > config_1.config.REWARD) {
+                        return { message: "reward transaction is invalid", code: 121 };
+                    }
+                }
+                else {
+                    let transactionResualt = Transaction_1.Transaction.isValid(transaction);
+                    if (transactionResualt !== true) {
+                        return transactionResualt;
+                    }
+                    else {
+                        const trueValue = Wallet_1.Wallet.calculateBalance(this.chain, transaction.inputMap.address);
+                        if (trueValue !== transaction.inputMap.amount) {
+                            return { message: "transaction amount is invalid", code: 123 };
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+}
 exports.Blockchain = Blockchain;
