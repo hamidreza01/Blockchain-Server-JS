@@ -9,7 +9,7 @@ try {
   const { Transaction } = require("./Src/classes/Blockchain/Transaction");
   const transactionPool = new TransactionPool();
   const {
-    config: { ADMIN },
+    config: { ADMIN }, config,
   } = require("./config");
 
   let nodeList = [ADMIN.httpIP];
@@ -107,7 +107,7 @@ try {
   });
   server.listen({
     port: 3001,
-    host: "localhost",
+    host : '0.0.0.0'
   });
 
   app.use(express.json());
@@ -186,7 +186,7 @@ try {
 
   // listen app
 
-  app.listen(process.env.PORT || 45451, () => {
+  app.listen(process.env.PORT || config.NODE_PORT || 45451, () => {
     console.log("admin is runnig");
   });
 } catch (error) {

@@ -1,12 +1,10 @@
-const DEFUALT_DIFFICULTY = 3;
+const DEFUALT_DIFFICULTY = 10;
 import { _Block } from "./Src/interfaces/Blockchain/_Block";
 import { _Transaction } from "./Src/interfaces/Blockchain/_Transaction";
-const ADMIN = {
-  httpIP : `localhost:45451` 
-}
 const REWARD_TRANSACTION  = {
   address : '**DPX Blockchain**'
 }
+const ROOT_URL = "127.0.0.1";
 const REWARD = 10;
 export const config: {
   NODE_PORT : number,
@@ -22,9 +20,11 @@ export const config: {
   REWARD: number;
 } = {
   NODE_PORT : 8765,
-  ADMIN,
+  ADMIN : {
+    httpIP : `http://${ROOT_URL}:${8765}`,
+  },
   MINE_RATE: 1000 * 60 * 10,
-  ROOT_URL: "127.0.0.1",
+  ROOT_URL,
   ROOT_PORT: 3001,
   GENESIS_DATA: {
     hash: "DEFAULT-DPX-GENESIS-HASH",
